@@ -1,0 +1,26 @@
+# FORMATTING IS A CONCEPTUAL DRAFT, SUBJECT TO CHANGE
+
+!!HP:2
+
+!!INTRO:
+A rattling sound echoes from behind you. You turn around to see the scattered bones take on their humanoid form again. With alarming ferocity, they lunge at you!
+
+!!ATTACKS:
+DESC1:The skeleton swings its sword overhead!
+RESP1:BLOCK WITH SHIELD
+TIME:5s
+
+DESC2:The skeleton lifts it's leg to it's chest in preparation for a kick!
+RESP2:TWIST BODY TO THE SIDE
+TIME:7s
+
+!!COUNTERS:
+DESC1:You see an opening!
+RESP1:SHIELDBASH RIBCAGE
+TIME:6s
+
+DESC2:The skeleton loses balance!
+RESP2:CRUSH SKELETONS LEFT LEG
+TIME:9s
+
+!!WIN: The skeleton, it's form shattered and feeble, falls into its constituent parts once more, never to move again.
