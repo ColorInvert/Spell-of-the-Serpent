@@ -27,6 +27,13 @@ def get_template():
 # Current render data. starting value is the contents of uitemplate.utf8ans.
 rend = get_template()
 
+# Holds a list of remaining round data, after a enemy.txt file has been loaded
+pending_rounds = []
+
+current_enemy = None
+
+current_frame = None
+
 
 #! FUNCTIONS
 
@@ -100,20 +107,84 @@ def initial_setup():
         quit()
 
 
+#! GAME FLOW/SYSTEM FUNCTIONS
+
+
 #! RENDERING FUNCTIONS
 
 
 # Pulls the information out of an enemy.txt file and parses it in prep for
 # the function render_hook_textfield(). See ABOUT_enemy_txt.md for details on parsing method.
-def get_enemy_data(dungeon,enemy):
+def load_enemy_data(dungeon, enemy):
 
-    regex = r'!ROUND!\n([\s\S]*?)(?=\n!ROUND!|$)'
-    
+    # Regex that parses a properly formatted enemy.txt file
+    regex = r"!ROUND!\n([\s\S]*?)(?=\n!ROUND!|$)"
+
+    # Get arguments for dungeon and enemy name, transform into a relative path and open file.
     with open(f"data/{dungeon}/enemies/{enemy}.txt", "r") as file:
         contents = file.read()
-    
-    round_list = re.findall(regex, contents)
-    print(f"roundlist is {round_list}")
+
+    # Update global variable current enemy with full contents of just-loaded enemy file.
+    global current_enemy
+    current_enemy = contents
+
+    # Update global variable pending rounds with a list of rounds from this enemy file
+    global pending_rounds
+    pending_rounds = re.findall(regex, contents)
+
+
+# With enemy data loaded, and a round in the pending_rounds variable, play a round of combat.
+def play_next_round():
+
+    # # Regex that parses a properly formatted enemy.txt file
+    # regex = r"!ROUND!\n([\s\S]*?)(?=\n!ROUND!|$)"
+
+    # round_list = re.findall(regex, current_enemy)
+
+    try:
+        current_round = pending_rounds.pop(0)
+
+    except:
+        print("ROUNDS LIST IS EMPTY!!!!! AAAAAAAAAAA!")
+
+    # Extract all lines of the sprite from the top of the enemy file.
+    sprite = current_enemy[0:77]
+
+    # Split sprite into constituent rows to make a list of them.
+    sprite_payloads = sprite.split("\n")
+
+    # print(f"sprite_payloads is \n{sprite_payloads}\n\n")
+
+    # Turn each sprite row into it's lettercode variable
+    a = sprite_payloads[0]
+    b = sprite_payloads[1]
+    c = sprite_payloads[2]
+    d = sprite_payloads[3]
+    e = sprite_payloads[4]
+    f = sprite_payloads[5]
+
+    # Get the next round in the queue, split into payload segments for screen rendering
+    text_payloads = current_round.split("\n")
+
+    # print(f"payloads list is {text_payloads}")
+
+    # ? Usage of .center() in the next section is to ensure we don't end up short any chars
+    # ? in rendering during the process of template replacement
+
+    # Grab the 7th line of the loaded enemy file, which has the enemy display name, and
+    # center it.
+    g = current_enemy.splitlines()[6].center(14)
+
+    # h through j are the 3 description lines, in order from top to bottom.
+    h = text_payloads[0].center(31)
+    i = text_payloads[1].center(31)
+    j = text_payloads[2].center(31)
+
+    # k is the player demand, which is left justified to match with where input occurs. 
+    k = text_payloads[3].ljust(31)
+
+    # With all elements parsed and split, send to render process for display.
+    render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k)
 
 
 # Replace all placeholder text sockets with current payload screen data.
@@ -123,8 +194,9 @@ def render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k):
 
     # Get template render to draw our data over
     new_frame = rend
+    # print(f"new_frame at the start is {new_frame}")
 
-    #! CHARACTER COUNTS FOR EACH SOCKET:
+    #? CHARACTER COUNTS FOR EACH SOCKET:
     # sprite_row (a-f) 12
     # enemy_socket (g) 14
     # desc_1(h) 31
@@ -133,57 +205,56 @@ def render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k):
     # demand(k) 31
 
     # Replace each line of the portrait
-    new_frame = re.sub(r"aaaaaaaaaaaa", a)
-    new_frame = re.sub(r"bbbbbbbbbbbb", b)
-    new_frame = re.sub(r"cccccccccccc", c)
-    new_frame = re.sub(r"dddddddddddd", d)
-    new_frame = re.sub(r"eeeeeeeeeeee", e)
-    new_frame = re.sub(r"ffffffffffff", f)
+    new_frame = re.sub(r"aaaaaaaaaaaa", a, new_frame)
+    new_frame = re.sub(r"bbbbbbbbbbbb", b, new_frame)
+    new_frame = re.sub(r"cccccccccccc", c, new_frame)
+    new_frame = re.sub(r"dddddddddddd", d, new_frame)
+    new_frame = re.sub(r"eeeeeeeeeeee", e, new_frame)
+    new_frame = re.sub(r"ffffffffffff", f, new_frame)
+    # print(f"new_frame after portrait replace is {new_frame}")
 
     # Enemy name
-    new_frame = re.sub(r"gggggggggggggg", g)
+    new_frame = re.sub(r"gggggggggggggg", g, new_frame)
 
     # Top 3 grey lines of description
-    new_frame = re.sub(r"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh", h)
-    new_frame = re.sub(r"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", i)
-    new_frame = re.sub(r"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj", j)
+    new_frame = re.sub(r"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh", h, new_frame)
+    new_frame = re.sub(r"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", i, new_frame)
+    new_frame = re.sub(r"jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj", j, new_frame)
 
     # Typing demand section of text box (magenta text user has to type for attack)
-    new_frame = re.sub(r"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", k)
+    new_frame = re.sub(r"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", k, new_frame)
+    # print(f"new_frame after all replacement is {new_frame}")
 
-    return new_frame
-
-
-# ?To be called after all screenspace text replacements are complete for the frame
-def render_ui():
-
-    with open("data/System/uitemplate.utf8ans", "r") as file:
-        contents = file.read()
-        print(contents)
+    render(new_frame)
 
 
-# ? Disclosure, these next two were chat GPT as well.
-def clear_screen():
-    os.system('printf "\033[?7l"')  # Disable line wrap
-    # ANSI escape code to clear the entire screen
-    print("\033[2J")
+# ? This is a bit silly, but it feels right to have this redundancy instead of printing
+# ? directly
+def render(frame):
+    print(frame)
 
 
-def move_cursor(row, col):
-    # ANSI escape code to move the cursor to a specific position
-    print(f"\033[{row};{col}H", end="")
+# # ? Disclosure, these deprecated functions were from chat GPT as well.
+# def clear_screen():
+#     os.system('printf "\033[?7l"')  # Disable line wrap
+#     # ANSI escape code to clear the entire screen
+#     print("\033[2J")
+
+# def move_cursor(row, col):
+#     # ANSI escape code to move the cursor to a specific position
+#     print(f"\033[{row};{col}H", end="")
 
 
-def hide_cursor():
-    print("\033[?25l", end="")  # ANSI escape code to hide the cursor
+# def hide_cursor():
+#     print("\033[?25l", end="")  # ANSI escape code to hide the cursor
 
 
-def show_cursor():
-    print("\033[?25h", end="")  # ANSI escape code to show the cursor
+# def show_cursor():
+#     print("\033[?25h", end="")  # ANSI escape code to show the cursor
 
 
-def enable_line_wrap():
-    os.system('printf "\033[?7h"')  # Enable line wrap
+# def enable_line_wrap():
+#     os.system('printf "\033[?7h"')  # Enable line wrap
 
 
 #!INPUT FUNCTIONS
@@ -233,18 +304,18 @@ def sanitize_string(string):
 console = Console()
 if __name__ == "__main__":
 
+    # Get screen ready
     initial_setup()
 
-
-
-    render_ui()
-
-
     # type_attack("B aSh    With SHIELD  ", 5)
-    time.sleep(3.5)
-    get_enemy_data("Tomb Of The Lost", "skeleton")
-    time.sleep(3.5)
-    
 
+    load_enemy_data("Tomb Of The Lost", "skeleton")
 
+    # print(
+    #     f"after load_enemy_data called, pending rounds is \n\n\n{pending_rounds}\n\n\n and current enemy is\n\n\n{current_enemy}\n\n\n"
+    # )
 
+    play_next_round()
+
+    # time.sleep(2.0)
+    # render_ui()
