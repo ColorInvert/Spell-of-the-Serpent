@@ -1,0 +1,24 @@
+!ROUND!
+The skeleton swings overhead!
+
+
+BLOCK WITH SHIELD
+5
+!ROUND!
+SKELETON readies a kick!
+
+
+TWIST BODY TO THE SIDE
+8
+!ROUND!
+You see an opening!
+
+
+SHIELDBASH RIBCAGE
+6
+!ROUND!
+The skeleton loses balance!
+
+
+POMMEL STRIKE SKELETON SKULL
+9
