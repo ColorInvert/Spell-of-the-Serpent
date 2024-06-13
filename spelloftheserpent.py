@@ -30,16 +30,23 @@ rend = get_template()
 # Holds a list of remaining round data, after a enemy.txt file has been loaded
 pending_rounds = []
 
+# Most recently loaded enemy file. Contains full .txt's contents
 current_enemy = None
 
+# An updating version of the current render frame. Rendering takes place in steps, so this
+# changes rapidly before the final frame is rendered, and is overridden when a new frame
+# needs to be processed.
 current_frame = None
+
+# Player's health. Number of mistakes player is allowed to make in the span of the session.
+hp = 3
 
 
 #! FUNCTIONS
 
 #! SCREEN SIZE AND STANDARDIZATION SUBFUNCTIONS
 
-# ? Disclosure: The terminal size commands were created by Chat GPT, and are thus, potentially in violation of copyright. Let me know if you are a holder and have issue with any of these, I am open to dialog, and changes that achieve equivalence.
+# ? Disclosure: The terminal size commands were created by Chat GPT, and are thus, potentially plagiarization.
 
 
 def resize_terminal(rows, columns):
@@ -109,13 +116,9 @@ def initial_setup():
 
 #! GAME FLOW/SYSTEM FUNCTIONS
 
-
-#! RENDERING FUNCTIONS
-
-
 # Pulls the information out of an enemy.txt file and parses it in prep for
 # the function render_hook_textfield(). See ABOUT_enemy_txt.md for details on parsing method.
-def load_enemy_data(dungeon, enemy):
+def load_enemy_file(dungeon, enemy):
 
     # Regex that parses a properly formatted enemy.txt file
     regex = r"!ROUND!\n([\s\S]*?)(?=\n!ROUND!|$)"
@@ -132,28 +135,22 @@ def load_enemy_data(dungeon, enemy):
     global pending_rounds
     pending_rounds = re.findall(regex, contents)
 
+#! RENDERING FUNCTIONS
 
 # With enemy data loaded, and a round in the pending_rounds variable, play a round of combat.
 def play_next_round():
-
-    # # Regex that parses a properly formatted enemy.txt file
-    # regex = r"!ROUND!\n([\s\S]*?)(?=\n!ROUND!|$)"
-
-    # round_list = re.findall(regex, current_enemy)
 
     try:
         current_round = pending_rounds.pop(0)
 
     except:
-        print("ROUNDS LIST IS EMPTY!!!!! AAAAAAAAAAA!")
+        print("ROUNDS LIST IS EMPTY!!!!! THIS SHOULD NEVER HAPPEN! BUG THIS!")
 
     # Extract all lines of the sprite from the top of the enemy file.
     sprite = current_enemy[0:77]
 
     # Split sprite into constituent rows to make a list of them.
     sprite_payloads = sprite.split("\n")
-
-    # print(f"sprite_payloads is \n{sprite_payloads}\n\n")
 
     # Turn each sprite row into it's lettercode variable
     a = sprite_payloads[0]
@@ -165,8 +162,6 @@ def play_next_round():
 
     # Get the next round in the queue, split into payload segments for screen rendering
     text_payloads = current_round.split("\n")
-
-    # print(f"payloads list is {text_payloads}")
 
     # ? Usage of .center() in the next section is to ensure we don't end up short any chars
     # ? in rendering during the process of template replacement
@@ -183,8 +178,19 @@ def play_next_round():
     # k is the player demand, which is left justified to match with where input occurs. 
     k = text_payloads[3].ljust(31)
 
+    # l is the ACTUAL text input being looked for, which in *most* cases should
+    # just be the same as k. tricky enemies might ask you to do one thing
+    # and actually want you to do something else to win the fight.
+    l = text_payloads[4]
+
+    # The time limit for current typing challenge
+    m = float(text_payloads[5])
+
     # With all elements parsed and split, send to render process for display.
     render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k)
+
+    #with render complete, perform current combat round. One try.
+    type_attack(l,m)
 
 
 # Replace all placeholder text sockets with current payload screen data.
@@ -194,15 +200,14 @@ def render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k):
 
     # Get template render to draw our data over
     new_frame = rend
-    # print(f"new_frame at the start is {new_frame}")
 
     #? CHARACTER COUNTS FOR EACH SOCKET:
-    # sprite_row (a-f) 12
-    # enemy_socket (g) 14
-    # desc_1(h) 31
-    # desc_2(i) 31
-    # desc_3(j) 31
-    # demand(k) 31
+    #? sprite_row (a-f) 12
+    #? enemy_socket (g) 14
+    #? desc_1(h) 31
+    #? desc_2(i) 31
+    #? desc_3(j) 31
+    #? demand(k) 31
 
     # Replace each line of the portrait
     new_frame = re.sub(r"aaaaaaaaaaaa", a, new_frame)
@@ -211,7 +216,6 @@ def render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k):
     new_frame = re.sub(r"dddddddddddd", d, new_frame)
     new_frame = re.sub(r"eeeeeeeeeeee", e, new_frame)
     new_frame = re.sub(r"ffffffffffff", f, new_frame)
-    # print(f"new_frame after portrait replace is {new_frame}")
 
     # Enemy name
     new_frame = re.sub(r"gggggggggggggg", g, new_frame)
@@ -223,7 +227,6 @@ def render_hook_textfield(a, b, c, d, e, f, g, h, i, j, k):
 
     # Typing demand section of text box (magenta text user has to type for attack)
     new_frame = re.sub(r"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk", k, new_frame)
-    # print(f"new_frame after all replacement is {new_frame}")
 
     render(new_frame)
 
@@ -234,36 +237,14 @@ def render(frame):
     print(frame)
 
 
-# # ? Disclosure, these deprecated functions were from chat GPT as well.
-# def clear_screen():
-#     os.system('printf "\033[?7l"')  # Disable line wrap
-#     # ANSI escape code to clear the entire screen
-#     print("\033[2J")
-
-# def move_cursor(row, col):
-#     # ANSI escape code to move the cursor to a specific position
-#     print(f"\033[{row};{col}H", end="")
-
-
-# def hide_cursor():
-#     print("\033[?25l", end="")  # ANSI escape code to hide the cursor
-
-
-# def show_cursor():
-#     print("\033[?25h", end="")  # ANSI escape code to show the cursor
-
-
-# def enable_line_wrap():
-#     os.system('printf "\033[?7h"')  # Enable line wrap
-
-
 #!INPUT FUNCTIONS
 
 
-# Run a pyinputplus timed input prompt, default timeout 10 seconds default attempts 1.
-# input will be compared after allcapsing and space-removing their entry AND the
-# type attack's entry. This allows type attack phrase to have spaces or unusual caps
+#TODO, LINK THIS INTO THE PLAY NEXT ROUND FUNCTION
 def type_attack(phrase, time=10, tries=1):
+
+    #Hook to our player health variable
+    global hp
 
     # Sanitize attack phrase
     phrase = sanitize_string(phrase)
@@ -278,6 +259,8 @@ def type_attack(phrase, time=10, tries=1):
     # Did they time out?
     if response == "NULL":
         print("YOU TOOK TOO LONG! -1 HP!")
+        
+        hp = hp - 1
 
     # Does attackphrase and user response match?
     elif response == phrase:
@@ -285,6 +268,7 @@ def type_attack(phrase, time=10, tries=1):
 
     else:
         print("ACTION FUMBLED! -1 HP!")
+        hp = hp - 1
 
 
 #!INPUT SUBFUNCTIONS
@@ -307,15 +291,16 @@ if __name__ == "__main__":
     # Get screen ready
     initial_setup()
 
-    # type_attack("B aSh    With SHIELD  ", 5)
+    # Load enemy
+    load_enemy_file("Tomb Of The Lost", "skeleton")
 
-    load_enemy_data("Tomb Of The Lost", "skeleton")
 
-    # print(
-    #     f"after load_enemy_data called, pending rounds is \n\n\n{pending_rounds}\n\n\n and current enemy is\n\n\n{current_enemy}\n\n\n"
-    # )
-
-    play_next_round()
+    while pending_rounds:
+        if hp == 0:
+            print("You have died! Game over!")
+            quit()
+        play_next_round()
+    print("We have escaped the while loop of combat.")
 
     # time.sleep(2.0)
     # render_ui()
