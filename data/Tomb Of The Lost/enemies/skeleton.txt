@@ -1,21 +1,21 @@
-XXXXXXXXXXXX
-XXXXXNOXXXXX
-XXXIMAGEXXXX
-XXXXDATAXXXX
-XXXFOUNDXXXX
-XXXXXXXXXXXX
+            
+     (+)    
+    /}={\   
+   @ }={ t  
+     / \    
+    d   b   
 SKELETON
 !ROUND!
-The skeleton swings overhead!
-That's pretty spooky!
-Wow wow wowow awawawawawa
+The skeleton lifts an arm,
+and begins to swing its fist
+down upon you!
 BLOCK WITH SHIELD
 BLOCK WITH SHIELD
 5
 !ROUND!
-SKELETON readies a kick!
-
-
+The skeleton leans backwards,
+raises its left leg, and
+readies a kick to your chest!
 TWIST BODY TO THE SIDE
 TWIST BODY TO THE SIDE
 8
@@ -27,9 +27,9 @@ SHIELDBASH RIBCAGE
 SHIELDBASH RIBCAGE
 6
 !ROUND!
-The skeleton loses balance!
-
-
+The skeleton stumbles back,
+reeling from the force of your
+attack!
 POMMEL STRIKE SKELETON SKULL
 POMMEL STRIKE SKELETON SKULL
 9
