@@ -3,38 +3,38 @@
 lets take a look at an example.
 
 ```
-XXXXXXXXXXXX
-XXXXXNOXXXXX
-XXXIMAGEXXXX
-XXXXDATAXXXX
-XXXFOUNDXXXX
-XXXXXXXXXXXX
+            
+     (+)    
+    /}={\   
+   @ }={ t  
+     / \    
+    d   b   
 SKELETON
-!ROUND1!
-The skeleton swings overhead!
-
-
+!ROUND!
+The skeleton lifts an arm,
+and begins to swing its fist
+down upon you!
 BLOCK WITH SHIELD
 BLOCK WITH SHIELD
 5
-!ROUND2!
-SKELETON readies a kick!
-
-
+!ROUND!
+The skeleton leans backwards,
+raises its left leg, and
+readies a kick to your chest!
 TWIST BODY TO THE SIDE
 TWIST BODY TO THE SIDE
 8
-!ROUND3!
+!ROUND!
 You see an opening!
 
 
 SHIELDBASH RIBCAGE
 SHIELDBASH RIBCAGE
 6
-!ROUND4!
-The skeleton loses balance!
-
-
+!ROUND!
+The skeleton stumbles back,
+reeling from the force of your
+attack!
 POMMEL STRIKE SKELETON SKULL
 POMMEL STRIKE SKELETON SKULL
 9
